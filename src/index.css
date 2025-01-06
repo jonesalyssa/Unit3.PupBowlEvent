@@ -9,3 +9,15 @@ img {
   height: 100%;
   object-fit: cover;
 }
+
+h1 {
+  text-align: center;
+  color: purple;
+  padding: 10px;
+}
+
+h2 {
+  text-align: center;
+  color: purple;
+  padding: 10px;
+}
