@@ -24,9 +24,7 @@ export default function PuppyList() {
         ) : (
           puppies.map((p) => (
             <li key={p.id}>
-              <h3>
-                {p.name} #{p.id}
-              </h3>
+              <h3>{p.name}</h3>
               <figure>
                 <img src={p.imageUrl} alt={p.name} />
               </figure>
