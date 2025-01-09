@@ -3,9 +3,6 @@ import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
 const COHORT_CODE = "2409-ET-WEB-PT";
 const API_URL = `https://fsa-puppy-bowl.herokuapp.com/api/${COHORT_CODE}/players`;
 
-// DONE: configure createApi to use API_URL as the base URL
-// DONE: add "Puppy" as a tag type.
-
 const api = createApi({
   reducerPath: "puppyApi",
   baseQuery: fetchBaseQuery({ baseUrl: API_URL }),
@@ -13,7 +10,7 @@ const api = createApi({
   endpoints: (builder) => ({
     getPuppies: builder.query({
       query: () => "",
-      transformResponse: (response) => response.data.players, // Extract the 'players' array from response data
+      transformResponse: (response) => response.data.players,
       providesTags: ["Puppy"],
     }),
     getPuppyDetails: builder.query({

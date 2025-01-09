@@ -1,28 +1,39 @@
+import { useDispatch } from "react-redux";
+import { Link, useLocation } from "react-router-dom";
 import { useGetPuppiesQuery } from "../../features/puppies/puppySlice";
-
-/**
- * @component
- * Shows a list of puppies in the roster.
- * Users can select a puppy to see more information about it.
- */
-
-// DONE: Get data from getPuppies query
+import { setSelectedPuppyId } from "../../features/puppies/puppySlice";
+import { useState, useEffect } from "react";
 
 export default function PuppyList() {
+  const dispatch = useDispatch();
   const { data, isLoading, error } = useGetPuppiesQuery();
+  const location = useLocation();
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setSearchTerm(params.get("search") || "");
+  }, [location.search]);
+
+  if (isLoading) return <p>Loading puppies...</p>;
+  if (error) return <p>Error loading puppies: {error.message}</p>;
 
   const puppies = Array.isArray(data) ? data : [];
-  if (isLoading) return <p>Loading players...</p>;
-  if (error) return <p>Error {error.message}</p>;
+
+  const filteredPuppies = searchTerm
+    ? puppies.filter((puppy) =>
+        puppy.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : puppies;
 
   return (
     <article>
       <h2>Roster</h2>
       <ul className="puppies">
-        {puppies.length === 0 ? (
-          <li>No players to show.</li>
+        {filteredPuppies.length === 0 ? (
+          <li>No puppies to show.</li>
         ) : (
-          puppies.map((p) => (
+          filteredPuppies.map((p) => (
             <li key={p.id}>
               <h3>{p.name}</h3>
               <figure>
@@ -30,6 +41,11 @@ export default function PuppyList() {
               </figure>
               <p>Breed: {p.breed}</p>
               <p>Status: {p.status}</p>
+              <Link to={`/puppies/${p.id}`}>
+                <button onClick={() => dispatch(setSelectedPuppyId(p.id))}>
+                  View Details
+                </button>
+              </Link>
             </li>
           ))
         )}
@@ -37,5 +53,3 @@ export default function PuppyList() {
     </article>
   );
 }
-
-PuppyList.propTypes = {};

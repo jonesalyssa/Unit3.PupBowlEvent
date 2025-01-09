@@ -1,36 +1,32 @@
-import { useState } from "react";
 import { Provider } from "react-redux";
 import store from "./store/store";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
+import NavBar from "./features/puppies/NavBar";
 import PuppyDetails from "./features/puppies/PuppyDetails";
 import PuppyList from "./features/puppies/PuppyList";
 import PuppyForm from "./features/puppies/PuppyForm";
 
 import "./App.scss";
-
-/**
- * @component
- * This app shows a list of puppy bowl players from the API.
- * Users can view players in the roster, add a player to the roster,
- * see more details about a specific player, and remove a player from the roster.
- */
+import "./index.css";
 
 export default function App() {
-  const [selectedPuppyId, setSelectedPuppyId] = useState();
-
   return (
     <Provider store={store}>
-      <div>
-        <h1>Puppy Bowl</h1>
-        <PuppyForm />
-        <main>
-          <PuppyList setSelectedPuppyId={setSelectedPuppyId} />
-          <PuppyDetails
-            selectedPuppyId={selectedPuppyId}
-            setSelectedPuppyId={setSelectedPuppyId}
-          />
-        </main>
-      </div>
+      <Router>
+        <div>
+          <h1>Puppy Bowl</h1>
+          <NavBar />
+          <main>
+            <Routes>
+              <Route path="/puppy-list" element={<PuppyList />} />
+              <Route path="/puppies/:id" element={<PuppyDetails />} />
+              <Route path="/puppy-form" element={<PuppyForm />} />
+              <Route path="/" element={<PuppyList />} />
+            </Routes>
+          </main>
+        </div>
+      </Router>
     </Provider>
   );
 }

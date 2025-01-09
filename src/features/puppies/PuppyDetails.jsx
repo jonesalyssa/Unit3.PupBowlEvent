@@ -1,75 +1,66 @@
+import { useParams, useNavigate } from "react-router-dom";
 import {
-  useGetPuppyQuery,
-  useDeletePuppyMutation,
+  useGetPuppyDetailsQuery,
+  useRemovePuppyMutation,
 } from "../../features/puppies/puppySlice";
-import PropTypes from "prop-types";
 
-/**
- * @component
- * Shows comprehensive information about the selected puppy, if there is one.
- * Also provides a button for users to remove the selected puppy from the roster.
- */
-export default function PuppyDetails({ selectedPuppyId, setSelectedPuppyId }) {
-  // DONE: Grab data from the `getPuppy` query
+export default function PuppyDetails() {
+  const { id } = useParams();
+  console.log("Puppy ID from route:", id);
 
-  const {
-    data: puppy,
-    isLoading,
-    error,
-  } = useGetPuppyQuery(selectedPuppyId, {
-    skip: !selectedPuppyId,
-  });
+  const { data, isLoading, isError, error } = useGetPuppyDetailsQuery(id);
+  console.log("API response data:", data);
+  console.log("API response error:", error);
 
-  // DONE: Use the `deletePuppy` mutation to remove a puppy when the button is clicked
+  const [removePuppy] = useRemovePuppyMutation();
+  const navigate = useNavigate();
 
-  const [deletePuppy, { isLoading: isDeleting }] = useDeletePuppyMutation();
+  const handleDelete = async () => {
+    try {
+      await removePuppy(id).unwrap();
+      navigate("/puppy-list");
+    } catch (err) {
+      console.error("Failed to delete the puppy:", err);
+    }
+  };
 
-  // Function to handle the removal of a puppy
-  function removePuppy(id) {
-    deletePuppy(id);
-    setSelectedPuppyId(null);
-  }
-  // There are 3 possibilities:
-  // 1. A puppy has not yet been selected.
-  //  2. A puppy has been selected, but results have not yet returned from the API.
-  // 3. Information about the selected puppy has returned from the API.
-
-  let $details;
-
-  if (!selectedPuppyId) {
-    $details = <p>Please select a puppy to see more details.</p>;
-  } else if (isLoading) {
-    $details = <p>Loading puppy information...</p>;
-  } else if (error) {
-    $details = <p>Error loading puppy information: {error.message}</p>;
-  } else if (puppy) {
-    $details = (
-      <>
-        <h3>
-          {puppy.name} #{puppy.id}
-        </h3>
-        <p>{puppy.breed}</p>
-        <p>Team: {puppy.team?.name ?? "Unassigned"}</p>
-        <button onClick={() => removePuppy(puppy.id)} disabled={isDeleting}>
-          {isDeleting ? "Removing..." : "Remove from roster"}
-        </button>
-        <figure>
-          <img src={puppy.imageUrl} alt={puppy.name} />
-        </figure>
-      </>
+  if (isLoading) return <p>Loading puppy information...</p>;
+  if (isError)
+    return (
+      <p>
+        Error loading puppy information:{" "}
+        {error?.data?.message || error?.message}
+      </p>
     );
-  }
+  if (!data) return <p>No details available for this puppy.</p>;
 
   return (
-    <aside>
-      <h2>Selected Puppy</h2>
-      {$details}
-    </aside>
+    <article>
+      <h1>Puppy Bowl</h1>
+
+      {/* Make sure the data is there */}
+      {data?.data?.player ? (
+        <>
+          <h2>{data.data.player.name}</h2>
+          <img
+            src={data.data.player.imageUrl}
+            alt={data.data.player.name}
+            style={{ maxWidth: "300px", height: "auto" }}
+          />
+          <p>
+            <strong>Breed:</strong> {data.data.player.breed}
+          </p>
+          <p>
+            <strong>Status:</strong> {data.data.player.status}
+          </p>
+          <p>
+            <strong>ID:</strong> {id}
+          </p>
+          <button onClick={handleDelete}>Delete Puppy</button>
+        </>
+      ) : (
+        <p>No details available for this puppy.</p>
+      )}
+    </article>
   );
 }
-
-PuppyDetails.propTypes = {
-  // I added the props stuff because I was getting console errors
-  selectedPuppyId: PropTypes.number,
-  setSelectedPuppyId: PropTypes.func.isRequired,
-};
